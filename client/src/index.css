@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.data-table th {
+    @apply p-4 border border-black font-bold;
+}
+
+.data-table td {
+    @apply p-4 border text-center;
+}
