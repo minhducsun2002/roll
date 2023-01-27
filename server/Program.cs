@@ -1,5 +1,7 @@
 using MongoDB.Driver;
+using OfficeOpenXml;
 
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
