@@ -33,6 +33,19 @@ namespace Roll.Controller
             return Ok();
         }
         
+        [HttpDelete]
+        [Route("table/{tableName}")]
+        public async Task<ActionResult<string>> DeleteTable(string tableName)
+        {
+            if (!await IsCollectionThere(tableName))
+            {
+                return NotFound();
+            }
+
+            await Database.DropCollectionAsync(tableName.ToLowerInvariant());
+            return Ok();
+        }
+        
         [HttpPost]
         [Route("table/{tableName}")]
         public async Task<ActionResult<string>> Create(string tableName, [FromBody] JObject obj)

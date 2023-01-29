@@ -72,8 +72,8 @@ namespace Roll.Controller
             }
             
             await Database.GetCollection<BsonDocument>(tableName).InsertManyAsync(newDocs);
-            
-            return Ok();
+            var a = new BsonArray(newDocs);
+            return Ok(a.ToJson(jsonWriterSettings));
         }
         
         private async Task<bool> IsCollectionThere(string tableName)
