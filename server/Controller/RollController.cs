@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
+using Roll.Filters;
 
 namespace Roll.Controller
 {
     [ApiController]
     [Route("/roll")]
+    [AuthorizationFilter]
     public class RollController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IMongoClient client;

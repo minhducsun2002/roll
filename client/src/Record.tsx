@@ -1,8 +1,10 @@
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
+import {CredentialContext, getAuth} from "./App";
 
 function Record({ record, keys, tableName, onSave, add } : { record: any, keys: string[], tableName: string, onSave?: () => void, add?: boolean }) {
     const [edited, setEdited] = useState(false);
     const [newRecord, setNewRecord] = useState<typeof record>({});
+    const creds = useContext(CredentialContext);
     
     useEffect(() => {
         setNewRecord(record);
@@ -33,7 +35,8 @@ function Record({ record, keys, tableName, onSave, add } : { record: any, keys: 
                             method: add ? 'POST' : 'PUT',
                             body: JSON.stringify(newRecord),
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'Authorization': getAuth(creds)
                             }
                         })
                             .then(res => {
@@ -56,6 +59,9 @@ function Record({ record, keys, tableName, onSave, add } : { record: any, keys: 
                         onClick={() => {
                             fetch(`/data/table/${tableName}/${record._id.$oid}`, {
                                 method: 'DELETE',
+                                headers: {
+                                    'Authorization': getAuth(creds)
+                                }
                             })
                                 .then(res => {
                                     if (res.status === 200) {

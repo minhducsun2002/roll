@@ -33,4 +33,5 @@ app.Run();
 static class Global
 {
     public const string DbName = "roll";
+    public const string UserCollection = "_user";
 }

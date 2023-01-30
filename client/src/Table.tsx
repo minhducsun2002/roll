@@ -1,13 +1,19 @@
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import Record from "./Record";
+import {CredentialContext, getAuth} from "./App";
 
 function Table({ name } : { name: string }) {
     let [loading, setLoading] = useState(false);
     let [data, setData] = useState<any[]>([]);
+    const creds = useContext(CredentialContext);
     
     let load = () => {
         setLoading(true);
-        fetch('/data/table/' + encodeURIComponent(name))
+        fetch('/data/table/' + encodeURIComponent(name), {
+            headers: {
+                    'Authorization': getAuth(creds)
+                }
+            })
             .then(res => res.json())
             .then(data => setData(data))
             .catch(console.log)

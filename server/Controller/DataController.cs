@@ -5,11 +5,13 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Roll.Filters;
 
 namespace Roll.Controller
 {
     [ApiController]
     [Route("/data")]
+    [AuthorizationFilter]
     public class DataController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IMongoClient client;
@@ -22,13 +24,20 @@ namespace Roll.Controller
         [Route("tables")]
         public async Task<ActionResult<List<string>>> ListTables()
         {
-            return await (await Database.ListCollectionNamesAsync()).ToListAsync();
+            var r = await (await Database.ListCollectionNamesAsync()).ToListAsync();
+            r = r.Where(r => !r.Equals(Global.UserCollection, StringComparison.InvariantCultureIgnoreCase)).ToList();
+            return r;
         }
         
         [HttpPost]
         [Route("table")]
         public async Task<IActionResult> CreateTable([FromBody] string tableName)
         {
+            if (await IsCollectionThere(tableName))
+            {
+                return Conflict();
+            }
+            
             await Database.CreateCollectionAsync(tableName.ToLowerInvariant());
             return Ok();
         }
@@ -37,6 +46,10 @@ namespace Roll.Controller
         [Route("table/{tableName}")]
         public async Task<ActionResult<string>> DeleteTable(string tableName)
         {
+            if (tableName.Equals(Global.UserCollection))
+            {
+                return Forbid();
+            }
             if (!await IsCollectionThere(tableName))
             {
                 return NotFound();
@@ -50,6 +63,10 @@ namespace Roll.Controller
         [Route("table/{tableName}")]
         public async Task<ActionResult<string>> Create(string tableName, [FromBody] JObject obj)
         {
+            if (tableName.Equals(Global.UserCollection))
+            {
+                return Forbid();
+            }
             if (!await IsCollectionThere(tableName))
             {
                 return NotFound();
@@ -65,6 +82,10 @@ namespace Roll.Controller
         [Route("table/{tableName}")]
         public async Task<ActionResult<string>> List(string tableName)
         {
+            if (tableName.Equals(Global.UserCollection))
+            {
+                return Forbid();
+            }
             if (!await IsCollectionThere(tableName))
             {
                 return NotFound();
@@ -80,6 +101,10 @@ namespace Roll.Controller
         [Route("table/{tableName}/{id}")]
         public async Task<ActionResult<string>> Get(string tableName, string id)
         {
+            if (tableName.Equals(Global.UserCollection))
+            {
+                return Forbid();
+            }
             if (!await IsCollectionThere(tableName))
             {
                 return NotFound();
@@ -96,6 +121,10 @@ namespace Roll.Controller
         [Route("table/{tableName}/{id}")]
         public async Task<ActionResult<string>> Put(string tableName, string id, [FromBody] JObject obj)
         {
+            if (tableName.Equals(Global.UserCollection))
+            {
+                return Forbid();
+            }
             if (!await IsCollectionThere(tableName))
             {
                 return NotFound();
@@ -124,6 +153,10 @@ namespace Roll.Controller
         [Route("table/{tableName}/{id}")]
         public async Task<ActionResult<string>> Delete(string tableName, string id)
         {
+            if (tableName.Equals(Global.UserCollection))
+            {
+                return Forbid();
+            }
             if (!await IsCollectionThere(tableName))
             {
                 return NotFound();

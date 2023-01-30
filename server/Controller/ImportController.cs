@@ -3,11 +3,13 @@ using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using OfficeOpenXml;
+using Roll.Filters;
 
 namespace Roll.Controller
 {
     [ApiController]
     [Route("/import")]
+    [AuthorizationFilter]
     public class ImportController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IMongoClient client;
