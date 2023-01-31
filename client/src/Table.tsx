@@ -1,6 +1,6 @@
 import {useContext, useEffect, useState} from "react";
 import Record from "./Record";
-import {CredentialContext, getAuth} from "./App";
+import {CredentialContext, getAuth, maskingCollection} from "./App";
 
 function Table({ name } : { name: string }) {
     let [loading, setLoading] = useState(false);
@@ -15,7 +15,10 @@ function Table({ name } : { name: string }) {
                 }
             })
             .then(res => res.json())
-            .then(data => setData(data))
+            .then(data => {
+                if (Array.isArray(data)) setData(data);
+                else setData([]);
+            })
             .catch(console.log)
             .finally(() => setLoading(false));
     }
@@ -42,6 +45,11 @@ function Table({ name } : { name: string }) {
         }
     }
     
+    let isHide = name === maskingCollection;
+    if (isHide) {
+        keys = new Set<string>(['prefix', 'suffix', 'name'])
+    }
+    
     return (
         <div>
             <table className="data-table">
@@ -53,10 +61,10 @@ function Table({ name } : { name: string }) {
                 <tbody>
                     {data.map(d => {
                         return (
-                            <Record tableName={name} keys={[...keys]} onSave={load} record={d} key={d._id?.$oid} />
+                            <Record tableName={name} isHide={isHide} keys={[...keys]} onSave={load} record={d} key={d._id?.$oid} />
                         )
                     })}
-                    <Record add={true} tableName={name} keys={[...keys]} onSave={load} record={{}} key={'nope'} />
+                    <Record add={true} isHide={isHide} tableName={name} keys={[...keys]} onSave={load} record={{}} key={'nope'} />
                 </tbody>
             </table>
         </div>

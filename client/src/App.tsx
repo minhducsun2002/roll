@@ -8,6 +8,7 @@ function validate(s: string) {
     
 }
 
+export const maskingCollection = '_hide';
 export let CredentialContext = createContext<[string, string]>(['', '']);
 export function getAuth(creds : [string, string]) {
     return `${btoa(creds[0])},${btoa(creds[1])}`;
@@ -121,7 +122,18 @@ function App() {
                     }} />
                 </div>
                 <div className={"flex flex-row gap-2 " + (loading ? 'pointer-events-none opacity-50' : '')}>
-                    {tables.map(t => {
+                    <div>
+                        <div className="flex flex-row rounded-md">
+                            <button
+                                    onClick={() => setCurrentTable(maskingCollection)}
+                                    className="border border-teal-600 p-1">
+                                <b>[Masking configuration]</b>
+                            </button>
+                        </div>
+                    </div>
+                    {tables
+                        .filter(t => t !== '_hide')
+                        .map(t => {
                         return (
                             <div className="flex flex-row rounded-md">
                                 <button key={t}

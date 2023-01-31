@@ -63,13 +63,16 @@ namespace Roll.Controller
         [Route("table/{tableName}")]
         public async Task<ActionResult<string>> Create(string tableName, [FromBody] JObject obj)
         {
-            if (tableName.Equals(Global.UserCollection))
+            if (tableName.Equals(Global.UserCollection, StringComparison.InvariantCultureIgnoreCase))
             {
                 return Forbid();
             }
             if (!await IsCollectionThere(tableName))
             {
-                return NotFound();
+                if (!tableName.Equals(Global.HideDataCollection, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return NotFound();   
+                }
             }
 
             var json = obj.ToString(Formatting.None);
@@ -91,7 +94,9 @@ namespace Roll.Controller
                 return NotFound();
             }
 
-            var docs = await Database.GetCollection<BsonDocument>(tableName).Find(doc => true)
+            var docs = await Database.GetCollection<BsonDocument>(tableName)
+                .Find(doc => true)
+                .Sort(Builders<BsonDocument>.Sort.Descending(RollController.CountKey))
                 .ToListAsync();
             var arr = new BsonArray(docs);
             return Ok(arr.ToJson(jsonWriterSettings));

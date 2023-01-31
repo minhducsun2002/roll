@@ -34,4 +34,5 @@ static class Global
 {
     public const string DbName = "roll";
     public const string UserCollection = "_user";
+    public const string HideDataCollection = "_hide";
 }

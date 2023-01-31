@@ -1,7 +1,9 @@
 import {useContext, useEffect, useState} from "react";
 import {CredentialContext, getAuth} from "./App";
 
-function Record({ record, keys, tableName, onSave, add } : { record: any, keys: string[], tableName: string, onSave?: () => void, add?: boolean }) {
+function Record({ record, keys, tableName, onSave, add, isHide } : 
+                { record: any, keys: string[], tableName: string, onSave?: () => void, add?: boolean, isHide?: boolean }
+) {
     const [edited, setEdited] = useState(false);
     const [newRecord, setNewRecord] = useState<typeof record>({});
     const creds = useContext(CredentialContext);
@@ -17,7 +19,7 @@ function Record({ record, keys, tableName, onSave, add } : { record: any, keys: 
                 if (typeof record[k] !== 'object')
                     return (
                         <td key={record[k]} className='p-2'>
-                            <input type='text' className='border border-b' value={newRecord[k]} onChange={ev => {
+                            <input type={(isHide && k !== 'name') ? 'number' : 'text'} className='border border-b' value={newRecord[k]} onChange={ev => {
                                 let n = { ...newRecord, [k]: ev.target.value };
                                 setNewRecord(n);
                                 setEdited(true);
