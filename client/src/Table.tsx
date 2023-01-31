@@ -1,6 +1,7 @@
 import {useContext, useEffect, useState} from "react";
 import Record from "./Record";
-import {CredentialContext, getAuth, maskingCollection} from "./App";
+import {getAuth, maskingCollection} from "./Data";
+import {CredentialContext} from "./App";
 
 function Table({ name } : { name: string }) {
     let [loading, setLoading] = useState(false);

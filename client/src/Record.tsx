@@ -1,5 +1,6 @@
 import {useContext, useEffect, useState} from "react";
-import {CredentialContext, getAuth} from "./App";
+import {getAuth} from "./Data";
+import {CredentialContext} from "./App";
 
 function Record({ record, keys, tableName, onSave, add, isHide } : 
                 { record: any, keys: string[], tableName: string, onSave?: () => void, add?: boolean, isHide?: boolean }
