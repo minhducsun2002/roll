@@ -21,7 +21,7 @@ function Record({ record, keys, tableName, onSave, add, isHide } :
                     return (
                         <td key={record[k]} className='p-2'>
                             <input type={(isHide && k !== 'name') ? 'number' : 'text'} className='border border-b' value={newRecord[k]} onChange={ev => {
-                                let n = { ...newRecord, [k]: ev.target.value };
+                                let n = { ...newRecord, [k]: (isHide && k !== 'name') ? ev.target.valueAsNumber : ev.target.value };
                                 setNewRecord(n);
                                 setEdited(true);
                             }} />
@@ -34,9 +34,14 @@ function Record({ record, keys, tableName, onSave, add, isHide } :
                     disabled={!edited}
                     className={'border border-black p-1 rounded-md disabled:opacity-50 disabled:pointer-events-none ' + (add ? 'bg-green-300' : 'bg-yellow-300')}
                     onClick={() => {
+                        let r = newRecord;
+                        if (isHide) {
+                            r.prefix = +r.prefix || 0;
+                            r.suffix = +r.suffix || 0;
+                        }
                         fetch(add ? `/data/table/${tableName}` : `/data/table/${tableName}/${record._id.$oid}`, {
                             method: add ? 'POST' : 'PUT',
-                            body: JSON.stringify(newRecord),
+                            body: JSON.stringify(r),
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': getAuth(creds)

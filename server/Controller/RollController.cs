@@ -3,6 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using Roll.Entities;
 using Roll.Filters;
 
 namespace Roll.Controller
@@ -64,7 +65,33 @@ namespace Roll.Controller
                 )
             );
 
-            var list = await final.ToListAsync();
+            var masks = await Database.GetCollection<HideRecord>(Global.HideDataCollection)
+                .Find(FilterDefinition<HideRecord>.Empty)
+                .ToListAsync();
+            var mappedMasks = masks.ToDictionary(m => m.Name, m => m);
+            IEnumerable<BsonDocument> list = await final.ToListAsync();
+            list = list.Select(a =>
+            {
+                foreach (var col in mappedMasks)
+                {
+                    if (a.Contains(col.Key) && a[col.Key] is BsonString v)
+                    {
+                        int pre = col.Value.Prefix, suf = col.Value.Suffix;
+                        var value = v.Value;
+                        if (pre + suf > value.Length)
+                        {
+                            a[col.Key] = new string('*', value.Length);
+                        }
+                        else
+                        {
+                            var final = new string('*', pre) + value[pre..^suf] + new string('*', suf);
+                            a[col.Key] = final;
+                        }
+                    }
+                }
+
+                return a;
+            });
             return Ok(list.ToJson(jsonWriterSettings));
         }
         
