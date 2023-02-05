@@ -65,10 +65,10 @@ namespace Roll.Controller
                 )
             );
 
-            var masks = await Database.GetCollection<HideRecord>(Global.HideDataCollection)
-                .Find(FilterDefinition<HideRecord>.Empty)
+            var masks = await Database.GetCollection<BsonDocument>(Global.HideDataCollection)
+                .Find(FilterDefinition<BsonDocument>.Empty)
                 .ToListAsync();
-            var mappedMasks = masks.ToDictionary(m => m.Name, m => m);
+            var mappedMasks = masks.ToDictionary(m => m["name"].AsString, m => m);
             IEnumerable<BsonDocument> list = await final.ToListAsync();
             list = list.Select(a =>
             {
@@ -76,7 +76,12 @@ namespace Roll.Controller
                 {
                     if (a.Contains(col.Key) && a[col.Key] is BsonString v)
                     {
-                        int pre = col.Value.Prefix, suf = col.Value.Suffix;
+                        int pre = col.Value["prefix"] is BsonString str1
+                                ? (int.TryParse(str1.Value, out var p) ? p : 0)
+                                : col.Value["prefix"].AsInt32,
+                            suf = col.Value["suffix"] is BsonString str2
+                                ? (int.TryParse(str2.Value, out var s) ? s : 0)
+                                : col.Value["suffix"].AsInt32;
                         var value = v.Value;
                         if (pre + suf > value.Length)
                         {
@@ -94,7 +99,7 @@ namespace Roll.Controller
             });
             return Ok(list.ToJson(jsonWriterSettings));
         }
-        
+
         private async Task<bool> IsCollectionThere(string tableName)
         {
             var names = await (await Database.ListCollectionNamesAsync()).ToListAsync();

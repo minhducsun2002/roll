@@ -2,13 +2,24 @@ import {useContext, useEffect, useState} from "react";
 import {getAuth, maskingCollection} from "./Data";
 import {CredentialContext} from "./App";
 import Record from "./Record";
+import AnimatedRoll from "./AnimatedRoll";
+
+function validate(s : string) {
+    let r = s.split(',').map(piece => +piece);
+    if (r.some(v => isNaN(v) || !Number.isSafeInteger(v))) {
+        return;
+    }
+    
+    return r.filter(Boolean);
+}
 
 function Roll() {
     let [tables, setTables] = useState<string[]>([]);
     let [currentTable, setCurrentTable] = useState<string>('');
-    let [rollCount, setRollCount] = useState(0);
     let [loading, setLoading] = useState(true);
     let [rolling, setRolling] = useState(false);
+    let [rollConfigString, setRollConfigStringString] = useState('');
+    let [rollConfig, setRollConfig] = useState<number[]>([]);
     let [rollResult, setRollResult] = useState<any[]>([]);
     let creds = useContext(CredentialContext);
 
@@ -76,10 +87,13 @@ function Roll() {
                             Go back
                         </button>
                         <button
-                            disabled={!rollCount || rolling}
+                            disabled={!validate(rollConfigString) || !rollConfigString || rolling}
                             className="border border-teal-600 p-2 bg-teal-600 text-white rounded-md disabled:pointer-events-none disabled:opacity-50"
                             onClick={() => {
+                                let cfg = validate(rollConfigString)!;
+                                setRollConfig(cfg);
                                 setRolling(true);
+                                let rollCount = cfg.reduce((a, b) => a + b, 0);
                                 fetch(`/roll/${encodeURIComponent(currentTable)}/${rollCount}`, {
                                     method: 'POST',
                                     headers: {
@@ -98,30 +112,19 @@ function Roll() {
                             Roll : <b>{currentTable}</b>
                         </button>
                         <div>for</div>
-                        <input className="p-1 border"
-                               type='number'
-                               value={rollCount} onChange={e => setRollCount(e.target.valueAsNumber)} />
-                        <div>entries</div>
+                        <input className={"p-1 border outline-none " + (validate(rollConfigString) ? '' : 'border-red-500')}
+                               type='text'
+                               value={rollConfigString} onChange={e => setRollConfigStringString(e.target.value)}/>
+                        <div>
+                            {`${Array.isArray(validate(rollConfigString)) ? `(total ${validate(rollConfigString)?.reduce((a, b) => a + b,  0)})` : ''} entries`}
+                        </div>
                     </div>
                 )}
                 {rolling && (<b>Rolling...</b>)}
                 {!!rollResult.length && !rolling && (
                     <div>
                         <br/>
-                        <table className="data-table mx-auto">
-                            <thead>
-                            <tr>
-                                {[...keys].map(k => (<th>{k}</th>))}
-                            </tr>
-                            </thead>
-                            <tbody>
-                                {rollResult
-                                    .sort((a, b) => a.__count - b.__count)
-                                    .map(row => {
-                                    return <tr>{[...keys].map(k => (<td>{row[k]}</td>))}</tr>
-                                })}
-                            </tbody>
-                        </table>
+                        <AnimatedRoll rollConfig={rollConfig} keys={[...keys]} entries={rollResult} />
                     </div>
                 )}
             </div>
