@@ -2,12 +2,13 @@ using MongoDB.Driver;
 using OfficeOpenXml;
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+var mongodbUri = Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING");
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers().AddNewtonsoftJson();
-builder.Services.AddSingleton<IMongoClient>(new MongoClient("mongodb://localhost:27017"));
+builder.Services.AddSingleton<IMongoClient>(new MongoClient(mongodbUri ?? "mongodb://localhost:27017"));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
